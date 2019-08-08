@@ -176,3 +176,19 @@ local Map in
    end
    {Browse {Map [1 2 3] fun {$ X} X*2 end}}
 end
+
+% Lazy evaluation
+declare ListsFrom LAppend
+fun lazy {ListsFrom N}
+   N | {ListsFrom N+1}
+end
+% Would crash if not for lazy
+{Browse {ListsFrom 1}.2.2.2.1}
+fun lazy {LAppend X Y}
+   case X
+   of nil then Y
+   [] H|T then H|{LAppend T Y}
+   end
+end
+
+
