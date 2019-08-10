@@ -64,6 +64,30 @@ fun {Length Xs}
 end
 {Browse {Length [1 2 3 4 5 6 7]}}
 
+% Problem 1 (e)
+% Redefine Map using FoldR
+declare MapX
+fun {MapX L F}
+   case L
+   of nil then nil
+   [] H|T then {FoldR [H] fun {$ X Y} {F X} end 1}
+      |{MapX T F}
+   end
+end
+{Browse {MapX [1 2 3] fun {$ X} X*X end}}
+
+% Problem 2
+declare Subsets
+fun {Subsets Xs}
+   case Xs
+   of nil then nil
+   [] H|T then
+      {Subsets T}
+      H|{Subsets T}
+   end
+end
+{Browse {Subsets [1 2 3]}}
+
 % Problem 3 (a)
 declare LFilter
 fun lazy {LFilter Predicate Xs}
@@ -77,3 +101,25 @@ fun lazy {LFilter Predicate Xs}
 end
 X = {LFilter fun {$ X} X > 0 end [2 ~3 0 ~7 4 8]}
 {Browse X.2.1}
+
+% Problem 3 (b)
+% NOTE: LFilter defined above is used here
+declare Sieve Prime Nums
+fun lazy {Nums N}
+   N|{Nums N+1}
+end
+
+fun lazy {Sieve Xs}
+   case Xs
+   of nil then nil
+   [] H|T then
+      H|{Sieve
+	 {LFilter fun {$ X} X mod H \= 0
+		  end T}}
+   end
+end
+
+fun lazy {Prime}
+   {Sieve {Nums 2}}
+end
+{Browse {Prime}.2.2.1} % 5
