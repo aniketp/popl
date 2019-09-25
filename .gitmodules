@@ -1,0 +1,3 @@
+[submodule "homework-2/InHs"]
+	path = homework-2/InHs
+	url = git@github.com:ayush268/InHs.git
