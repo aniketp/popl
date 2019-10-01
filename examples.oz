@@ -191,4 +191,68 @@ fun lazy {LAppend X Y}
    end
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Declarative Concurrency %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+declare Gen A B X Y
+fun {Gen L N}
+   {Delay 2000}
+   if L == N then nil else L|{Gen L+1 N} end
+end
+A = {Gen 1 10}
+B = {Map A fun {$ X} X*X end}
+{Browse [A B]}
+
+thread X = {Gen 1 10} end
+thread Y = {Map X fun {$ X} X*X end} end
+{Browse Y}
+
+% Partial termination
+declare Double X Y
+fun {Double X}
+   case X
+   of nil then nil
+   [] H|T then 2*X|{Double T}
+   end
+end
+Y = {Double X}
+
+declare ForAll L L1 L2
+proc {ForAll Xs P}
+   case Xs of nil then skip
+   [] X|Xr then {P X} {ForAll Xr P} end
+end
+thread {ForAll L Browse} end
+thread L = 1|L1 end
+thread L1 = 2|L2 end
+thread L2 = 3|nil end
+
+% Sieve of Eratosthenes
+declare IntsFrom NonMultiple Sieve
+fun {IntsFrom N}
+   N|{IntsFrom N+1}
+end
+fun {NonMultiple N}
+   fun {$ M}
+      M mod N \= 0
+   end
+end
+fun {Sieve Xs}
+   local Ys in
+      case Xs
+      of X|Xr then
+	 thread
+	    Ys = {Filter Xr {NonMultiple X}}
+	 end
+	 X|{Sieve Ys}
+      [] nil then nil
+      end
+   end
+end
+
+local Xs Ys in
+   thread Xs = {IntsFrom 2} end
+   thread Ys = {Sieve Xs} end
+   {Browse Ys}
+end
