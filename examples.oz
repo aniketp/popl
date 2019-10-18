@@ -256,3 +256,75 @@ local Xs Ys in
    thread Ys = {Sieve Xs} end
    {Browse Ys}
 end
+
+% ByNeed: Demand driven concurrency
+declare Y
+{ByNeed proc {$ A} A = 111*111 end Y}
+{Browse Y}    % Y not needed here
+{Wait Y}      % Y needed here
+
+declare X Y Z
+thread X = {ByNeed fun {$} 3 end} end
+thread Y = {ByNeed fun {$} 4 end} end
+thread Z = X+Y end
+{Browse Z}
+
+% Implement lazy functions with ByNeed
+declare Generate Generate1 L
+fun lazy {Generate N} N|{Generate N+1} end
+fun {Generate1 N}
+   {ByNeed fun {$} N|{Generate N+1} end}
+end
+L = {Generate1 0}
+{Browse L.2.2.1
+
+% Thread synchronization
+declare X
+thread {Delay 4000} X=1 end
+thread {Wait X} {Browse X} end
+% thread2 waits 4 sec for X
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Message Passing Concurrency %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Intro in Roy-haridi
+declare S P in
+{NewPort S P}
+{Browse S}
+{Send P a}
+{Send P b}
+
+declare Port
+local Stream in
+   {NewPort Stream Port}
+   thread for M in Stream do {Browse M} end end
+end
+% Only the port is visible outside
+thread
+   {Send Port hello}
+   {Delay 2000}
+   {Send Port world}
+end
+thread {Send Port hi} end
+
+% New port object abstraction
+declare NewPortObject
+fun {NewPortObject Init Fun}
+   proc {MsgLoop S1 State}
+      case S1 of Msg|S2 then
+	 {MsgLoop S2 {Fun Msg State}}
+      [] nil then skip end
+   end
+   Sin
+in
+   thread {MsgLoop Sin Init} end
+   {NewPort Sin}
+end
+
+declare NewPortObject2
+fun {NewPortObject2 Proc}
+   Sin in
+   thread for Msg in Sin do {Proc Msg} end end
+   {NewPort Sin}
+end
