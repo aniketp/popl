@@ -72,3 +72,44 @@ end
 
 %=========== Problem 2.2 ===========
 
+declare MyPort Port
+fun {MyPort Proc}
+   Stream in
+   thread
+      for Msg in Stream do
+	 {Proc Msg}
+      end
+   end
+   {NewPort Stream}
+end
+Port = {MyPort proc {$ X} {Browse X} end}
+thread {Send Port apple#thread1} end
+thread {Send Port mango#thread2} end
+
+%=========== Problem 2.3 ===========
+
+declare MyPort ClientPort ServerPort
+fun {MyPort Proc}
+   Stream in
+   thread
+      for Msg in Stream do
+	 {Proc Msg}
+      end
+   end
+   {NewPort Stream}
+end
+declare Reverse1
+fun {Reverse1 Msg}
+   case Msg
+   of nil then nil
+   [] H|T then {Append {Reverse1 T} [H]}
+   end
+end
+ClientPort = {MyPort proc {$ X} {Browse X} end}
+ServerPort = {MyPort proc {$ X}
+			{Send ClientPort {Reverse1 X}}
+		     end}
+{Send ServerPort "apple"}
+{Send ServerPort "mango"}
+
+%====================================
