@@ -19,9 +19,14 @@ proc {Thread P1 P2}
       thread X = {P1} end
       thread Y = {P2} end
       {WaitBoth X Y}
+      {Browse "P1 and P2 complete"}
    end
 end
-declare A B
+declare A B Aa Bb
+{Thread proc {$ Aa} {Delay 3000} Aa=1 {Browse Aa} end
+ proc {$ Bb} {Delay 6000} Bb=2 {Browse Bb} end}
+
+% Independent working of "WaitBoth"
 thread {Delay 3000} A=3 end
 thread {Delay 6000} B=6 end
 thread {WaitBoth A B} {Browse worked} end
@@ -38,17 +43,17 @@ fun {MergeThunk X Y}
       [] H|T then
 	 if H > X.1
 	 then fun {$}
-		 X.1|{{MergeThunk X.2 Y}}
+		 X.1|{MergeThunk X.2 Y}
 	      end
 	 else fun {$}
-		 H|{{MergeThunk X T}}
+		 H|{MergeThunk X T}
 	      end
 	 end
       end
    end
 end
 declare X = {MergeThunk [1 3 7] [2 4 6]}
-{Browse {X}}    % Thunked Sorting
+{Browse {{{X}.2}.2}.1}    % Thunked Sorting
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% Message Passing Model %%%%%%%
@@ -56,6 +61,9 @@ declare X = {MergeThunk [1 3 7] [2 4 6]}
 
 %=========== Problem 2.1 ===========
 
+% Here the output can be any two of
+% apple, mango, banana, and tomato.
+% This signifies "non-determinism"
 declare X Y
 thread {Delay {Int.'mod' {OS.rand} 10}} X = apple end
 thread {Delay {Int.'mod' {OS.rand} 10}} Y = mango end
@@ -88,6 +96,10 @@ thread {Send Port mango#thread2} end
 
 %=========== Problem 2.3 ===========
 
+% NOTE: Enable Strings in Oz Browser
+% in Options/Representations to see the
+% reverted message in string instead of
+% list of characters.
 declare MyPort ClientPort ServerPort
 fun {MyPort Proc}
    Stream in
