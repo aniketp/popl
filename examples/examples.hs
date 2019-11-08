@@ -46,5 +46,5 @@ instance Main.Functor BinaryTree where
 
 instance Applicative [] where
     pure x = [x]
-    fs <*> xs = [f x| f <- fs, x <- xs]
+    fs <*> xs = [f xr| f <- fs, xr <- xs]
 
