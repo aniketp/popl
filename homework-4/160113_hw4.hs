@@ -3,9 +3,19 @@
  - Author: Aniket Pandey (160113)
  -}
 
-permute :: (Num a) => [a] -> [b] -> [a]
-permute _ _ = []
-permute (x:xs) (y:ys) =  
+------------------------------------------------------------
+--------------------- Problem 1.1 --------------------------
+------------------------------------------------------------
+permuteAux :: (Num b, Eq b) => [a] -> [b] -> b -> [a]
+permuteAux (x:xs) (y:ys) r
+    | y == r = [x] ++ permuteAux xs ys (r+1)
+    | otherwise = permuteAux (xs ++ [x]) (ys ++ [y]) r
+permuteAux _ _ x = []
+
+permute :: (Eq b, Num b) => [a] -> [b] -> [a]
+permute x y
+    | length x == length y = permuteAux x y 0
+    | otherwise = error "Different length lists"
 
 ------------------------------------------------------------
 --------------------- Problem 1.2 --------------------------
@@ -13,13 +23,14 @@ permute (x:xs) (y:ys) =
 compose :: [(a -> a)] -> a -> a
 compose [] x = x
 compose (x:xs) y = compose xs (x y)
+compose _ _ = error "Some random error message"
 
 ------------------------------------------------------------
 --------------------- Problem 1.3 --------------------------
 ------------------------------------------------------------
 altMap :: [a] -> (a -> b) -> (a -> b) -> [b]
-altMap (fst:snd:rest) f g = (f fst):(g snd): altMap rest f g
-altMap [x] f g = [f x]
+altMap (fst:snd:rest) f g = (f fst) : (g snd) : altMap rest f g
+altMap [x] f _ = [f x]
 altMap _ _ _ = []
 
 ------------------------------------------------------------
