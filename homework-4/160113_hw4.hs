@@ -42,6 +42,7 @@ data BinaryTree a = Nil | Node a (BinaryTree a) (BinaryTree a)
 binaryTreeMap :: (a -> b) -> BinaryTree a -> BinaryTree b
 binaryTreeMap f Nil = Nil
 binaryTreeMap f (Node a left right) = Node (f a) (binaryTreeMap f left) (binaryTreeMap f right)
+extractNode f x = nodeVal where Node nodeVal Nil Nil = (f x)
 
 instance Functor BinaryTree where
     fmap = binaryTreeMap
@@ -55,7 +56,7 @@ instance Applicative BinaryTree where
 instance Monad BinaryTree where
     return x = Node x Nil Nil
     Nil >>= _ = Nil
-    Node x left right >>= f = f x
+    Node x left right >>= f = Node (extractNode f x) (left >>= f) (right >>= f)
 
 ------------------------------------------------------------
 --------------------- Problem 2.2 --------------------------
